@@ -1,23 +1,21 @@
 package clifford
 
-import (
-	"runtime/debug"
-)
+import "fmt"
 
-const root = "github.com/chriso345/clifford"
+func BuildVersion(target any) (string, error) {
+	if !isStructPtr(target) {
+		return "", fmt.Errorf("invalid type: must pass pointer to struct")
+	}
 
-// Version returns the version of the gore module, if available.
-func Version() string {
-	if info, ok := debug.ReadBuildInfo(); ok {
-		if info.Main.Path == root && info.Main.Version != "" {
-			return info.Main.Version
-		}
-		for _, dep := range info.Deps {
-			if dep.Path == root {
-				return dep.Version
+	t := getStructType(target)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Name == "Version" {
+			if val := field.Tag.Get("version"); val != "" {
+				return val, nil
 			}
 		}
 	}
 
-	return "unknown"
+	return "No version specified", nil
 }
