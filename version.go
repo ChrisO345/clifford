@@ -1,22 +1,23 @@
 package clifford
 
-import "fmt"
+import (
+	"runtime/debug"
+)
 
-func BuildVersion(target any) (string, error) {
-	if !isStructPtr(target) {
-		return "", fmt.Errorf("invalid type: must pass pointer to struct")
-	}
+const root = "github.com/chriso345/clifford"
 
-	t := getStructType(target)
-	for i := range t.NumField() {
-		field := t.Field(i)
-		if field.Name == "Version" {
-			if val := field.Tag.Get("version"); val != "" {
-				return val, nil
+// ModuleVersion returns the version of the clifford module, if available.
+func ModuleVersion() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		if info.Main.Path == root && info.Main.Version != "" {
+			return info.Main.Version
+		}
+		for _, dep := range info.Deps {
+			if dep.Path == root {
+				return dep.Version
 			}
 		}
 	}
 
-	// FIXME: If no version tag is found, try to infer a version
-	return "No version specified", nil
+	return "unknown"
 }

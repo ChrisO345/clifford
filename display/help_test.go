@@ -1,4 +1,4 @@
-package clifford_test
+package display_test
 
 import (
 	"strings"
@@ -25,7 +25,7 @@ func TestBuildHelp_ValidInput(t *testing.T) {
 		}
 	}{}
 
-	help, err := clifford.BuildHelp(&target)
+	help, err := clifford.BuildHelp(&target, false)
 	assert.Nil(t, err)
 	assert.StringContains(t, help, "Usage:")
 	assert.StringContains(t, help, "[INPUT]")
@@ -44,9 +44,9 @@ func TestBuildHelp_MissingNameTag(t *testing.T) {
 		}
 	}{}
 
-	_, err := clifford.BuildHelp(&target)
+	_, err := clifford.BuildHelp(&target, false)
 	assert.NotNil(t, err)
-	assert.Equal(t, "struct must embed `Clifford` with `name` tag", err.Error())
+	assert.Equal(t, err.Error(), "struct must embed `Clifford` with `name` tag")
 }
 
 func TestBuildHelp_NoOptionsOrArgs(t *testing.T) {
@@ -54,7 +54,7 @@ func TestBuildHelp_NoOptionsOrArgs(t *testing.T) {
 		clifford.Clifford `name:"emptytool"`
 	}{}
 
-	help, err := clifford.BuildHelp(&target)
+	help, err := clifford.BuildHelp(&target, false)
 	assert.Nil(t, err)
 	assert.StringContains(t, help, "Usage: emptytool")
 	assert.NotStringContains(t, help, "Arguments:")
@@ -69,7 +69,7 @@ func TestBuildHelp_VersionAndHelp(t *testing.T) {
 		clifford.Help
 	}{}
 
-	help, err := clifford.BuildHelp(&target)
+	help, err := clifford.BuildHelp(&target, false)
 	assert.Nil(t, err)
 	assert.StringContains(t, help, "--version")
 	assert.StringContains(t, help, "--help")
@@ -89,7 +89,7 @@ func TestOptionsAlignment(t *testing.T) {
 		}
 	}{}
 
-	help, err := clifford.BuildHelp(&target)
+	help, err := clifford.BuildHelp(&target, false)
 	assert.Nil(t, err)
 
 	lines := strings.Split(help, "\n")

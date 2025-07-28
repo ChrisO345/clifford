@@ -1,12 +1,12 @@
-package clifford
+package common
 
 import (
 	"reflect"
 	"strings"
 )
 
-// getTagsFromEmbedded retrieves tags from embedded structs in the target struct.
-func getTagsFromEmbedded(t reflect.Type, fieldName string) map[string]string {
+// GetTagsFromEmbedded retrieves tags from embedded structs in the target struct.
+func GetTagsFromEmbedded(t reflect.Type, fieldName string) map[string]string {
 	tags := make(map[string]string)
 
 	for i := range t.NumField() {
@@ -38,8 +38,8 @@ func getTagsFromEmbedded(t reflect.Type, fieldName string) map[string]string {
 	return tags
 }
 
-// indexOf returns the index of the first occurrence of s in args, or -1 if not found.
-func indexOf(args []string, s string) int {
+// ArgsIndexOf returns the index of the first occurrence of s in args, or -1 if not found.
+func ArgsIndexOf(args []string, s string) int {
 	for i, arg := range args {
 		if arg == s {
 			return i
@@ -48,21 +48,21 @@ func indexOf(args []string, s string) int {
 	return -1
 }
 
-// isStructPtr checks if the provided value is a pointer to a struct.
-func isStructPtr(v any) bool {
+// IsStructPtr checks if the provided value is a pointer to a struct.
+func IsStructPtr(v any) bool {
 	t := reflect.TypeOf(v)
 	return t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct
 }
 
-// getStructType returns the reflect.Type of the underlying struct pointer.
-func getStructType(v any) reflect.Type {
+// GetStructType returns the reflect.Type of the underlying struct pointer.
+func GetStructType(v any) reflect.Type {
 	return reflect.TypeOf(v).Elem()
 }
 
-// metaEnabled returns true if the root struct has a `Clifford` field with tag or name matching s
+// MetaArgEnabled returns true if the root struct has a `Clifford` field with tag or name matching s
 // or if the field name itself matches s.
-func metaEnabled(s string, target any) bool {
-	t := getStructType(target)
+func MetaArgEnabled(s string, target any) bool {
+	t := GetStructType(target)
 
 	for i := range t.NumField() {
 		field := t.Field(i)

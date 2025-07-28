@@ -1,4 +1,4 @@
-package clifford
+package display
 
 import "strings"
 

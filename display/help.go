@@ -1,55 +1,20 @@
-package clifford
+package display
 
 import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/chriso345/clifford/internal/common"
 )
 
-// BuildHelp generates and returns a formatted help message for a CLI tool
-// defined by the given struct pointer.
-//
-// The `target` must be a pointer to a struct that embeds a `Clifford` field
-// with a `name` tag. This tag specifies the CLI tool's name and is displayed
-// in the usage header.
-//
-// The function inspects the struct to determine CLI arguments and options,
-// including those marked as required. It outputs a help string that includes:
-//   - The usage line with the command name and expected arguments
-//   - A section for required arguments (based on `Required` tags)
-//   - A section for optional flags (based on `short` or `long` tags)
-//
-// If no `name` tag is found on any embedded `Clifford` field, the function
-// returns an error.
-//
-// Example:
-//
-//	target := struct {
-//		clifford.Clifford `name:"mytool"`
-//
-//		Filename struct {
-//			Value    string
-//			clifford.Required
-//			clifford.Desc `desc:"Input file path"`
-//		}
-//
-//		Verbose struct {
-//			Value    bool
-//			clifford.Clifford `short:"v" long:"verbose" desc:"Enable verbose output"`
-//		}
-//	}{}
-//
-//	helpText, err := clifford.BuildHelp(&target)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	fmt.Println(helpText)
-func BuildHelp(target any) (string, error) {
-	if !isStructPtr(target) {
+func BuildHelp(target any, long bool) (string, error) {
+	_ = long // Unused parameter, kept for compatibility
+	if !common.IsStructPtr(target) {
 		return "", fmt.Errorf("invalid type: must pass pointer to struct")
 	}
 
-	t := getStructType(target)
+	t := common.GetStructType(target)
 
 	// Find struct tag with `name`
 	name := ""
@@ -96,7 +61,7 @@ func BuildHelp(target any) (string, error) {
 
 // argsHelp generates help text for positional arguments in the target struct.
 func argsHelp(target any) string {
-	t := getStructType(target)
+	t := common.GetStructType(target)
 
 	var lines []string
 	maxLen := 0
@@ -111,7 +76,7 @@ func argsHelp(target any) string {
 			continue
 		}
 
-		tags := getTagsFromEmbedded(field.Type, field.Name)
+		tags := common.GetTagsFromEmbedded(field.Type, field.Name)
 		if tags["short"] != "" || tags["long"] != "" {
 			continue
 		}
@@ -137,7 +102,7 @@ func argsHelp(target any) string {
 
 // optionsHelp generates help text for options in the target struct.
 func optionsHelp(target any) string {
-	t := getStructType(target)
+	t := common.GetStructType(target)
 
 	var lines []string
 	maxLen := 0
@@ -184,7 +149,7 @@ func optionsHelp(target any) string {
 			continue
 		}
 
-		tags := getTagsFromEmbedded(field.Type, field.Name)
+		tags := common.GetTagsFromEmbedded(field.Type, field.Name)
 		if tags["short"] == "" && tags["long"] == "" {
 			continue
 		}
@@ -222,7 +187,7 @@ func optionsHelp(target any) string {
 
 // getRequiredArgs returns a list of required argument names from the target struct.
 func getRequiredArgs(target any) []string {
-	t := getStructType(target)
+	t := common.GetStructType(target)
 
 	var args []string
 	for i := range t.NumField() {
@@ -231,7 +196,7 @@ func getRequiredArgs(target any) []string {
 			continue
 		}
 
-		tags := getTagsFromEmbedded(field.Type, field.Name)
+		tags := common.GetTagsFromEmbedded(field.Type, field.Name)
 		if tags["short"] != "" || tags["long"] != "" {
 			continue
 		}
@@ -245,7 +210,7 @@ func getRequiredArgs(target any) []string {
 
 // hasOptions checks if the target struct has any options defined with short or long flags.
 func hasOptions(target any) bool {
-	t := getStructType(target)
+	t := common.GetStructType(target)
 
 	for i := range t.NumField() {
 		field := t.Field(i)
@@ -260,7 +225,7 @@ func hasOptions(target any) bool {
 			return true
 		}
 
-		tags := getTagsFromEmbedded(field.Type, field.Name)
+		tags := common.GetTagsFromEmbedded(field.Type, field.Name)
 		if tags["short"] != "" || tags["long"] != "" {
 			return true
 		}

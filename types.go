@@ -1,6 +1,6 @@
 package clifford
 
-// === META TAGS ===
+import "github.com/chriso345/clifford/core"
 
 // Clifford is the primary metadata marker for CLI definitions.
 //
@@ -13,21 +13,23 @@ package clifford
 // Usage:
 //
 // Root-level CLI tool definition:
-//   cli := struct {
-//       Clifford `name:"mytool" version:"1.0.0"`
-//       ...
-//   }{}
+//
+//	cli := struct {
+//	    Clifford `name:"mytool" version:"1.0.0"`
+//	    ...
+//	}{}
 //
 // Sub-struct flag definition using Clifford for metadata:
-//   cli := struct {
-//       Clifford `name:"mytool"`
 //
-//       Name struct {
-//           Value    string
-//           Clifford `short:"n" long:"name" desc:"User name"`
-//       }
-//   }{}
-type Clifford struct{}
+//	cli := struct {
+//	    Clifford `name:"mytool"`
+//
+//	    Name struct {
+//	        Value    string
+//	        Clifford `short:"n" long:"name" desc:"User name"`
+//	    }
+//	}{}
+type Clifford = core.Clifford
 
 // Version is a marker type that indicates the CLI tool supports a `--version` flag.
 //
@@ -38,17 +40,19 @@ type Clifford struct{}
 // Usage:
 //
 // // Automatic detection or programmatic assignment
-// cli := struct {
-//     Clifford `name:"mytool"`
-//     Version
-// }{}
+//
+//	cli := struct {
+//	    Clifford `name:"mytool"`
+//	    Version
+//	}{}
 //
 // // Static version string via struct tag
-// cli := struct {
-//     Clifford `name:"mytool"`
-//     Version `version:"1.0.0"`
-// }{}
-type Version struct{}
+//
+//	cli := struct {
+//	    Clifford `name:"mytool"`
+//	    Version `version:"1.0.0"`
+//	}{}
+type Version = core.Version
 
 // Help is a marker type that enables the automatic `--help` and `-h` flag handling.
 //
@@ -58,14 +62,12 @@ type Version struct{}
 //
 // Usage:
 //
-// cli := struct {
-//     Clifford `name:"mytool"`
-//     Help
-//     ...
-// }{}
-type Help struct{}
-
-// === TAGGING ===
+//	cli := struct {
+//	    Clifford `name:"mytool"`
+//	    Help
+//	    ...
+//	}{}
+type Help = core.Help
 
 // ShortTag is a helper type used to automatically generate a short flag
 // (e.g. `-n`) for a CLI option based on the parent struct field name.
@@ -75,26 +77,26 @@ type Help struct{}
 //
 // Usage:
 //
-//   cli := struct {
-//       Name struct {
-//           Value    string
-//           ShortTag // Will auto-generate: -n
-//       }
-//   }{}
-type ShortTag struct{}
+//	cli := struct {
+//	    Name struct {
+//	        Value    string
+//	        ShortTag // Will auto-generate: -n
+//	    }
+//	}{}
+type ShortTag = core.ShortTag
 
 // LongTag is a helper type used to automatically generate a long flag
 // (e.g. `--name`) for a CLI option based on the parent struct field name.
 //
 // Usage:
 //
-//   cli := struct {
-//       Name struct {
-//           Value   string
-//           LongTag // Will auto-generate: --name
-//       }
-//   }{}
-type LongTag struct{}
+//	cli := struct {
+//	    Name struct {
+//	        Value   string
+//	        LongTag // Will auto-generate: --name
+//	    }
+//	}{}
+type LongTag = core.LongTag
 
 // Required is a marker type that indicates the associated argument or flag is required.
 //
@@ -102,13 +104,13 @@ type LongTag struct{}
 //
 // Usage:
 //
-//   cli := struct {
-//       File struct {
-//           Value    string
-//           Required // Must be supplied on the command line
-//       }
-//   }{}
-type Required struct{}
+//	cli := struct {
+//	    File struct {
+//	        Value    string
+//	        Required // Must be supplied on the command line
+//	    }
+//	}{}
+type Required = core.Required
 
 // Desc is a helper type that allows you to annotate a CLI option or argument with a description.
 //
@@ -116,10 +118,10 @@ type Required struct{}
 //
 // Usage:
 //
-//   cli := struct {
-//       Name struct {
-//           Value string
-//           Desc  `desc:"Name of the user"`
-//       }
-//   }{}
-type Desc struct{}
+//	cli := struct {
+//	    Name struct {
+//	        Value string
+//	        Desc  `desc:"Name of the user"`
+//	    }
+//	}{}
+type Desc = core.Desc
