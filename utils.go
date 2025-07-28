@@ -9,7 +9,7 @@ import (
 func getTagsFromEmbedded(t reflect.Type, fieldName string) map[string]string {
 	tags := make(map[string]string)
 
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if !field.Anonymous {
 			continue
@@ -64,7 +64,7 @@ func getStructType(v any) reflect.Type {
 func metaEnabled(s string, target any) bool {
 	t := getStructType(target)
 
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 
 		// Must be a Clifford field at root

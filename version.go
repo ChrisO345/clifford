@@ -8,7 +8,7 @@ func BuildVersion(target any) (string, error) {
 	}
 
 	t := getStructType(target)
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.Name == "Version" {
 			if val := field.Tag.Get("version"); val != "" {
@@ -17,5 +17,6 @@ func BuildVersion(target any) (string, error) {
 		}
 	}
 
+	// FIXME: If no version tag is found, try to infer a version
 	return "No version specified", nil
 }

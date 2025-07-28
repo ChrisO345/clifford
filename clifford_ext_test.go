@@ -61,6 +61,30 @@ func TestParse_PositionalArgs(t *testing.T) {
 	assert.Equal(t, "30", cli.Age.Value)
 }
 
+func TestParse_DebugPositionalArgs(t *testing.T) {
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+
+	os.Args = []string{"junk", "junk", "--", "Alice", "30"}
+
+	cli := struct {
+		clifford.Clifford `name:"mytool"`
+
+		Name struct {
+			Value string
+			clifford.Required
+		}
+		Age struct {
+			Value string
+		}
+	}{}
+
+	err := clifford.Parse(&cli)
+	assert.Nil(t, err)
+	assert.Equal(t, cli.Name.Value, "Alice")
+	assert.Equal(t, cli.Age.Value, "30")
+}
+
 func TestParse_MissingRequired(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()

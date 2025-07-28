@@ -53,7 +53,7 @@ func BuildHelp(target any) (string, error) {
 
 	// Find struct tag with `name`
 	name := ""
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.Tag.Get("name") != "" {
 			name = field.Tag.Get("name")
@@ -101,7 +101,7 @@ func argsHelp(target any) string {
 	var lines []string
 	maxLen := 0
 
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.Type.Name() == "Clifford" || field.Type.Name() == "Version" || field.Type.Name() == "Help" {
 			continue
@@ -142,7 +142,7 @@ func optionsHelp(target any) string {
 	var lines []string
 	maxLen := 0
 
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.Type.Name() == "Clifford" {
 			if field.Tag.Get("version") != "" {
@@ -225,7 +225,7 @@ func getRequiredArgs(target any) []string {
 	t := getStructType(target)
 
 	var args []string
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.Type.Kind() != reflect.Struct {
 			continue
@@ -247,7 +247,7 @@ func getRequiredArgs(target any) []string {
 func hasOptions(target any) bool {
 	t := getStructType(target)
 
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.Type.Kind() != reflect.Struct {
 			continue
