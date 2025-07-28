@@ -25,23 +25,34 @@ func Parse(target any) error {
 		args = args[i+1:]
 	}
 
-	// Pre-process args into a map for fast lookup
+	// Pre-process args into maps for fast lookup
 	argMap := map[string]string{}
 	argFlags := map[string]bool{}
+	used := map[int]bool{}
+
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		if strings.HasPrefix(arg, "--") || strings.HasPrefix(arg, "-") {
 			argFlags[arg] = true
+			used[i] = true
 			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
 				argMap[arg] = args[i+1]
+				used[i+1] = true
 				i++ // skip the value
 			}
 		}
 	}
 
-	// Handle help/version
-	if common.MetaArgEnabled("Help", target) {
+	// Extract positional arguments (non-flag args)
+	var positionals []string
+	for i, arg := range args {
+		if !used[i] {
+			positionals = append(positionals, arg)
+		}
+	}
 
+	// Handle --help
+	if common.MetaArgEnabled("Help", target) {
 		if argFlags["-h"] || argFlags["--help"] {
 			help, err := display.BuildHelp(target, argFlags["--help"])
 			if err != nil {
@@ -51,6 +62,8 @@ func Parse(target any) error {
 			osExit(0)
 		}
 	}
+
+	// Handle --version
 	if common.MetaArgEnabled("Version", target) {
 		if argFlags["--version"] {
 			version, err := display.BuildVersion(target)
@@ -64,14 +77,13 @@ func Parse(target any) error {
 
 	v := reflect.ValueOf(target).Elem()
 	t := v.Type()
-
 	positionalIndex := 0
 
 	for i := range t.NumField() {
 		field := t.Field(i)
 
-		// Skip internal meta fields
-		if field.Type.Name() == "Clifford" {
+		// Skip meta fields like Clifford, Version, Help
+		if field.Type.Name() == "Clifford" || field.Type.Name() == "Version" || field.Type.Name() == "Help" {
 			continue
 		}
 		if field.Type.Kind() != reflect.Struct {
@@ -88,21 +100,21 @@ func Parse(target any) error {
 		longFlag := "--" + tags["long"]
 		shortFlag := "-" + tags["short"]
 
-		// Check for long or short flags in map
+		// Check long flag
 		if tags["long"] != "" {
 			if val, ok := argMap[longFlag]; ok {
 				value = val
 				found = true
 			}
 		}
+		// Check short flag
 		if !found && tags["short"] != "" {
 			if val, ok := argMap[shortFlag]; ok {
 				value = val
 				found = true
 			}
 		}
-
-		// Handle boolean flags (no value)
+		// Handle boolean flags (without values)
 		if !found && tags["long"] != "" {
 			if _, ok := argFlags[longFlag]; ok {
 				value = "true"
@@ -116,10 +128,10 @@ func Parse(target any) error {
 			}
 		}
 
-		// Handle positional arguments
+		// Handle positional arguments (no short or long tag)
 		if !found && tags["short"] == "" && tags["long"] == "" {
-			if positionalIndex < len(args) && !strings.HasPrefix(args[positionalIndex], "-") {
-				value = args[positionalIndex]
+			if positionalIndex < len(positionals) {
+				value = positionals[positionalIndex]
 				positionalIndex++
 				found = true
 			}
@@ -127,7 +139,6 @@ func Parse(target any) error {
 
 		// Required check
 		if !found && tags["required"] == "true" {
-			// FIXME: Replace this with a custom error handling system as this is an external user error
 			return fmt.Errorf("missing required argument: %s", field.Name)
 		}
 

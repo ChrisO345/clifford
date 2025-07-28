@@ -9,7 +9,10 @@ Clifford is a simple and lightweight library for building command-line interface
 
 ## Features
 
-`clifford` is still under early development. This section will be updated as features are added.
+- Define positional arguments, short flags (`-f`), and long flags (`--flag`) via struct embedding and tags.
+- Support for required and optional arguments.
+- Automatic generation of help messages (`--help`) and version information (`--version`).
+- Extensible through embedding and custom struct types.
 
 ---
 
@@ -23,7 +26,66 @@ go get github.com/chriso345/clifford
 
 ## Usage
 
-`clifford` is still under early development. This section will be updated as features are added.
+Define your CLI argument structure using embedded `clifford.Clifford` and marker types for flags and descriptions:
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/chriso345/clifford"
+)
+
+func main() {
+	target := struct {
+		clifford.Clifford `name:"mytool"`   // Set the name of the CLI tool
+		clifford.Version  `version:"1.2.3"` // Enable automatic version flag
+		clifford.Help                       // Enable automatic help flags
+
+		Name struct {
+			Value             string
+			clifford.Clifford `short:"n" long:"name" desc:"User name"`
+		}
+		Age struct {
+			Value             string
+			clifford.ShortTag // auto generates -a
+			clifford.LongTag  // auto generates --age
+			clifford.Desc     `desc:"Age of the user"`
+		}
+	}{}
+
+	err := clifford.Parse(&target)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Name: %s\n", target.Name.Value)
+	fmt.Printf("Age: %s\n", target.Age.Value)
+}
+```
+- Passing `-h` or `--help` will print an automatically generated help message and exit.
+- Passing `--version` will print the version information and exit.
+
+## Public API
+
+The public API of `clifford` is still under development. The following types and functions are available:
+
+- `clifford.Parse(target any) error`: Parses the command-line arguments and populates the target struct.
+- `clifford.BuildHelp(target any) string`: Generates a help message for the CLI defined by `target`.
+- `clifford.BuildVersion(target any) string`: Generates a version message for the CLI defined by `target`.
+
+### Public Marker Types
+
+`clifford` provides several marker types to define flags and descriptions in your CLI:
+- `clifford.Clifford`: Base type for all CLI definitions. Must be embedded in the target struct. `clifford.Clifford` can also be used as a marker for individual fields.
+- `clifford.Help`: Enables automatic help message generation.
+- `clifford.Version`: Enables automatic version message generation.
+- `clifford.ShortTag`: Marks a field as having a short flag (e.g., `-f`). If no short flag is specified, it defaults to the first letter of the field name.
+- `clifford.LongTag`: Marks a field as having a long flag (e.g., `--flag`). If no long flag is specified, it defaults to the field name in kebab-case.
+- `clifford.Desc`: Provides a description for the field, which is used in the help message. Requires a `desc` tag with the description text.
+- `clifford.Required`: Marks a field as required. If a required field is not provided, `clifford.Parse` will return an error.
 
 ---
 
